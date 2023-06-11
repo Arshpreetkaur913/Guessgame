@@ -1,0 +1,221 @@
+// name - Arshpreet kaur And Amneet Singh
+// final project : number guess game
+
+// include the library code:
+#include <LiquidCrystal.h>
+#include <Keypad.h>
+
+// keypad syntax from https://linuxhint.com/interface-keypad-and-lcd-arduino/#:~:text=Below%20is%20the%20Arduino%20code%20for%20the%20interfacing,the%20keypad%20is%3A%20%23%20include%20%3C%20Keypad.h%20%3E
+
+
+
+// matching library with the connecting pins
+LiquidCrystal lcd(A4, A5, 5, 4, 3, 2);
+
+ 
+//array for keys
+const byte ROWS = 4; //4 row
+const byte COLS = 4; //4 row
+char keys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+
+//connecting rows and coloums of the keypad
+byte rowPins[ROWS] = {A0, A1, 11, 10}; 
+byte colPins[COLS] = {9, 8, 7, 6}; 
+int LCDrow=0;
+
+//connect array to keypad 
+Keypad keypad= Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
+
+//specifc led for win and lose
+int GreenPin= 13;//at pin 13
+int RedPin= 12;//at pin 12
+
+
+
+//variables for game
+int Arsh;
+int answer;
+int life =3;
+String inputString;
+
+void setup() 
+{
+  Serial.begin(9600);
+   //display 
+  lcd.begin(16, 2);
+  lcd.print("Number Game!!");
+  lcd.setCursor(3, 1);
+  lcd.print("GUESS GAME");
+  delay(200);
+  lcd.clear();//to clear 
+  
+  lcd.begin(16, 2);
+  lcd.print("Guess a Number");
+  lcd.setCursor(1, 1);
+  lcd.print("between 0-9");
+  delay(200);
+  lcd.clear();//to clear 
+  
+  lcd.setCursor(0, 0);
+  lcd.print("Press * to");
+  lcd.setCursor(0, 1);
+  lcd.print("confirm answer");
+  delay(200); 
+  lcd.clear();
+  
+  randomSeed(analogRead(0));
+ Arsh=random(10);//choose random number
+  delay(20);
+ 
+  
+}
+
+void loop()
+{ 
+  
+  delay(200);
+   // fixed life panel at top
+  lcd.setCursor(0, 0);
+  	lcd.print("Lives Left: ");
+  	lcd.setCursor(14, 0);
+  	lcd.print(life);
+  
+  // user key input
+    char key= keypad.getKey();
+  
+  if (key >= '0' && key <= '100'){
+    lcd.begin(16, 2);
+  
+    lcd.setCursor(1, 1);
+    lcd.print(key);
+    
+    inputString += key;//character to input string
+    
+  }
+  
+  
+ // if user enter button
+  else if (key == '*')
+  {
+    // idea from https://www.delftstack.com/howto/arduino/arduino-char-to-int/
+    
+    if (inputString.length() >= 0) 
+    {
+      //red led means you got it wrong, green led means you got it right 
+      
+answer = inputString.toInt(); //string to int 
+inputString = "";               // clear input
+Serial.println(answer);
+
+// if answer doesn't match with the random
+      // 2 possibilities either greater or smaller
+      
+  // for greater    
+      if (answer < Arsh)
+ {
+digitalWrite(GreenPin, LOW);//off
+digitalWrite(RedPin, HIGH);// on 
+  
+ hint();
+  
+   // every time you answer wrongthe life will deducted by 1      
+ 
+life = life -1;
+  
+ } 
+// for smaller
+      else if (answer > Arsh)
+	{
+digitalWrite(GreenPin, LOW);//off
+   digitalWrite(RedPin, HIGH);//on
+        
+  hint();
+  // every time you answer wromg the life will deducted by 1      
+life = life -1;
+} 
+// if you answer matches with random number OR
+      //you guess right
+      else if(answer==Arsh)
+{
+ // win loop will run
+	you_win();
+        delay(50);
+}
+              	
+  }
+  }
+  // if your all life are finished
+    if (life == 0)
+    {
+      // lose loop will run
+      you_lose();
+    }
+  
+ 
+}
+
+// hint loop
+void hint(){
+  // if random number is greater than 5
+  if(Arsh>5){
+  lcd.clear();
+  lcd.setCursor(1,0);
+    lcd.print("number > 5");
+    delay(200);
+  }
+  // if number less than 5
+  else{
+  lcd.clear();
+  lcd.setCursor(1,0);
+    lcd.print("number < 5");
+    delay(200);}
+}
+
+// win loop
+void you_win(){
+  
+digitalWrite(RedPin, LOW); // low
+digitalWrite(GreenPin, HIGH); // high
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("hurrrah!"); // print hurray and you win 
+lcd.setCursor(0, 1);
+lcd.print("you win !!!");
+delay(2000); 
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("Restarting"); // restarting game
+lcd.setCursor(0, 1);
+lcd.print("Game!!!");
+delay(200);
+lcd.clear();
+ // loop will start again or game will start again
+life=3;
+}
+
+// void for you lose
+void you_lose(){
+digitalWrite(GreenPin, LOW);
+      digitalWrite(RedPin, HIGH);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Game Over");
+      lcd.setCursor(0, 1);
+      lcd.print("Restart Game!");
+      delay(200); 
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Answer:");
+      lcd.setCursor(0, 1);
+      lcd.print(Arsh);
+      delay(200);
+      lcd.clear();
+  // loop will start agin
+      life=3;
+}
+
