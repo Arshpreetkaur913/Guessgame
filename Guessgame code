@@ -218,4 +218,6 @@ digitalWrite(GreenPin, LOW);
   // loop will start agin
       life=3;
 }
+Link for the output in tinkercad
+https://www.tinkercad.com/things/kaoLAuZ1Lu4-final-project/editel?sharecode=xFNKf3CyOzzkaiTYeLkzySmfiExrpzpUjEcJDWargvI
 
